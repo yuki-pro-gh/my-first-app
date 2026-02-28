@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Quotes</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f0f1a;
+      font-family: 'Georgia', serif;
+      overflow: hidden;
+    }
+
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(120, 40, 200, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(40, 120, 255, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 60% 80%, rgba(200, 60, 100, 0.10) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      width: min(680px, 90vw);
+      text-align: center;
+    }
+
+    .label {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 2.5rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 3.5rem 3rem;
+      backdrop-filter: blur(20px);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 40px 80px rgba(0,0,0,0.4);
+      transition: transform 0.3s ease;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.8rem;
+    }
+
+    .quote-mark {
+      font-size: 5rem;
+      line-height: 0;
+      color: rgba(150, 100, 255, 0.35);
+      font-family: 'Georgia', serif;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .quote-en {
+      font-size: clamp(1.1rem, 3vw, 1.45rem);
+      color: rgba(255, 255, 255, 0.92);
+      line-height: 1.7;
+      font-style: italic;
+      letter-spacing: 0.01em;
+      opacity: 1;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(150, 100, 255, 0.5), transparent);
+      margin: 0 auto;
+    }
+
+    .quote-ja {
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
+      color: rgba(255, 255, 255, 0.45);
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .author {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      color: rgba(150, 100, 255, 0.7);
+      text-transform: uppercase;
+    }
+
+    .card.fade-out .quote-en,
+    .card.fade-out .quote-ja {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .button-wrap {
+      margin-top: 2.5rem;
+    }
+
+    button {
+      background: linear-gradient(135deg, rgba(120, 60, 220, 0.8), rgba(60, 100, 255, 0.8));
+      border: 1px solid rgba(150, 100, 255, 0.4);
+      border-radius: 50px;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.9rem 2.5rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(100, 60, 200, 0.3);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(100, 60, 200, 0.5);
+      background: linear-gradient(135deg, rgba(140, 80, 240, 0.9), rgba(80, 120, 255, 0.9));
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .counter {
+      margin-top: 1.5rem;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+
+  <div class="container">
+    <p class="label">Words of Wisdom</p>
+
+    <div class="card" id="card">
+      <span class="quote-mark">"</span>
+      <p class="quote-en" id="quote-en"></p>
+      <div class="divider"></div>
+      <p class="quote-ja" id="quote-ja"></p>
+      <p class="author" id="author"></p>
+    </div>
+
+    <div class="button-wrap">
+      <button onclick="nextQuote()">Next Quote &rarr;</button>
+    </div>
+
+    <p class="counter" id="counter"></p>
+  </div>
+
+  <script>
+    const quotes = [
+      {
+        en: "The journey of a thousand miles begins with a single step.",
+        ja: "千里の道も一歩から。",
+        author: "Lao Tzu"
+      },
+      {
+        en: "In the middle of every difficulty lies opportunity.",
+        ja: "あらゆる困難の中に、チャンスが潜んでいる。",
+        author: "Albert Einstein"
+      },
+      {
+        en: "It does not matter how slowly you go as long as you do not stop.",
+        ja: "どれほどゆっくりでも構わない。止まらなければいい。",
+        author: "Confucius"
+      },
+      {
+        en: "Life is what happens when you're busy making other plans.",
+        ja: "人生とは、他の計画を立てている間に起きることだ。",
+        author: "John Lennon"
+      },
+      {
+        en: "The only way to do great work is to love what you do.",
+        ja: "偉大な仕事をする唯一の方法は、自分の仕事を愛することだ。",
+        author: "Steve Jobs"
+      },
+      {
+        en: "Darkness cannot drive out darkness; only light can do that.",
+        ja: "闇は闇を追い払えない。光だけがそれをできる。",
+        author: "Martin Luther King Jr."
+      },
+      {
+        en: "We accept the love we think we deserve.",
+        ja: "人は自分が値すると思う愛しか受け入れられない。",
+        author: "Stephen Chbosky"
+      },
+      {
+        en: "Two roads diverged in a wood, and I took the one less traveled by.",
+        ja: "森の中で道が二つに分かれていた。私はあまり人が通らない道を選んだ。",
+        author: "Robert Frost"
+      },
+      {
+        en: "You must be the change you wish to see in the world.",
+        ja: "あなた自身が世界に見たいと思う変化にならなければならない。",
+        author: "Mahatma Gandhi"
+      },
+      {
+        en: "Whether you think you can or you think you can't, you're right.",
+        ja: "できると思えばできる。できないと思えばできない。どちらも正しい。",
+        author: "Henry Ford"
+      },
+      {
+        en: "The best time to plant a tree was 20 years ago. The second best time is now.",
+        ja: "木を植える最善のタイミングは20年前だった。次に良いのは今だ。",
+        author: "Chinese Proverb"
+      },
+      {
+        en: "Not all those who wander are lost.",
+        ja: "さすらう者が皆、迷っているわけではない。",
+        author: "J.R.R. Tolkien"
+      },
+      {
+        en: "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.",
+        ja: "あなたを別の何かにしようとする世界で、自分自身であり続けることが最大の功績だ。",
+        author: "Ralph Waldo Emerson"
+      },
+      {
+        en: "It always seems impossible until it's done.",
+        ja: "何事も、成し遂げるまでは不可能に見える。",
+        author: "Nelson Mandela"
+      },
+      {
+        en: "The unexamined life is not worth living.",
+        ja: "吟味されない人生は、生きる価値がない。",
+        author: "Socrates"
+      },
+      {
+        en: "Fall seven times, stand up eight.",
+        ja: "七転び八起き。",
+        author: "Japanese Proverb"
+      },
+      {
+        en: "Simplicity is the ultimate sophistication.",
+        ja: "シンプルさこそが究極の洗練である。",
+        author: "Leonardo da Vinci"
+      },
+      {
+        en: "The mind is everything. What you think, you become.",
+        ja: "心がすべてだ。あなたが考えることが、あなたになる。",
+        author: "Buddha"
+      },
+      {
+        en: "Do one thing every day that scares you.",
+        ja: "毎日、自分を怖がらせることを一つしなさい。",
+        author: "Eleanor Roosevelt"
+      },
+      {
+        en: "Stars can't shine without darkness.",
+        ja: "星は闇がなければ輝けない。",
+        author: "Unknown"
+      }
+    ];
+
+    let current = -1;
+
+    function nextQuote() {
+      const card = document.getElementById('card');
+
+      card.classList.add('fade-out');
+
+      setTimeout(() => {
+        let next;
+        do { next = Math.floor(Math.random() * quotes.length); } while (next === current);
+        current = next;
+
+        const q = quotes[current];
+        document.getElementById('quote-en').textContent = q.en;
+        document.getElementById('quote-ja').textContent = q.ja;
+        document.getElementById('author').textContent = '— ' + q.author;
+        document.getElementById('counter').textContent = `${current + 1} / ${quotes.length}`;
+
+        card.classList.remove('fade-out');
+      }, 350);
+    }
+
+    nextQuote();
+  </script>
+</body>
+</html>

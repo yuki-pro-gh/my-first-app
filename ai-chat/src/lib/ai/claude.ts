@@ -16,6 +16,7 @@ export async function askClaude(
   history: Message[] = []
 ): Promise<string> {
   const messages = [
+    { role: "system" as const, content: "回答は簡潔にまとめてください。不要な説明は省き、要点のみ答えてください。" },
     ...history.map((m) => ({ role: m.role, content: m.content })),
     { role: "user" as const, content: question },
   ];

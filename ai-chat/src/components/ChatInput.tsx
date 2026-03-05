@@ -43,8 +43,8 @@ export function ChatInput({ onSend, disabled, prefillText }: ChatInputProps) {
   }
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
-      <div className="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
+    <div className="border-t border-gray-200 bg-white px-3 pt-3 pb-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+      <div className="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
         <textarea
           ref={textareaRef}
           rows={1}

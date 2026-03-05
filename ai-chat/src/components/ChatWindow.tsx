@@ -104,7 +104,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
       )}
 
       {/* Message area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      <div className="flex-1 overflow-y-auto px-4 py-3">
         <div className="mx-auto max-w-2xl space-y-4">
           {fetching && (
             <p className="text-center text-sm text-gray-400">Loading...</p>
@@ -151,7 +151,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
       </div>
 
       {/* Input area */}
-      <div className="mx-auto w-full max-w-2xl">
+      <div className="w-full">
         <ChatInput onSend={handleSend} disabled={loading} prefillText={prefillText} />
       </div>
     </div>

@@ -59,7 +59,9 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
           <span className="ml-3 text-sm font-semibold text-gray-800 md:ml-0">Hallucination Check</span>
         </div>
 
-        {children}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          {children}
+        </div>
       </main>
     </div>
   );

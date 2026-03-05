@@ -21,15 +21,18 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
   if (isUser) {
     return (
       <div className="flex justify-end group">
-        <div className="flex items-end gap-2">
+        <div className="flex flex-col items-end gap-1">
+          <div className="max-w-[75%] rounded-2xl rounded-tr-sm bg-blue-600 px-4 py-2 text-sm text-white">
+            {message.content}
+          </div>
           {/* Copy / Edit buttons */}
-          <div className="flex flex-col gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => handleCopy(message.content)}
               className="text-xs text-gray-400 hover:text-gray-600 px-1"
               title="Copy"
             >
-              {copied ? "✓" : "Copy"}
+              {copied ? "✓ Copied" : "Copy"}
             </button>
             {onEdit && (
               <button
@@ -40,9 +43,6 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
                 Edit
               </button>
             )}
-          </div>
-          <div className="max-w-[75%] rounded-2xl rounded-tr-sm bg-blue-600 px-4 py-2 text-sm text-white">
-            {message.content}
           </div>
         </div>
       </div>

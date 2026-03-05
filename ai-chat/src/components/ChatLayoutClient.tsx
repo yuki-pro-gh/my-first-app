@@ -56,7 +56,7 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="ml-3 text-sm font-medium text-gray-700">AI Chat</span>
+          <span className="ml-3 text-sm font-medium text-gray-700">Hallucination Check</span>
         </div>
 
         {children}

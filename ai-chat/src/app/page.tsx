@@ -25,7 +25,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-md text-center">
-        <h1 className="text-2xl font-bold text-gray-900">AI Chat</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Hallucination Check</h1>
         <p className="mt-2 text-sm text-gray-500">
           Multi-model AI Chat
         </p>

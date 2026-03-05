@@ -112,7 +112,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
 
           {!fetching && messages.length === 0 && (
             <div className="text-center">
-              <p className="text-2xl font-semibold text-gray-700">AI Chat</p>
+              <p className="text-2xl font-semibold text-gray-700">Hallucination Check</p>
               <p className="mt-2 text-sm text-gray-400">
                 Llama and Qwen answer, ✅ if they agree,<br />
                 ⚠️ shows both answers if they differ

@@ -3,7 +3,7 @@ import "./globals.css";
 import { SessionProvider } from "@/components/SessionProvider";
 
 export const metadata: Metadata = {
-  title: "AI Chat",
+  title: "Hallucination Check",
   description: "マルチモデル合議AIチャット",
 };
 

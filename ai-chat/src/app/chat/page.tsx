@@ -18,7 +18,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-1 items-center justify-center text-sm text-gray-400">
-      新しいチャットを作成中...
+      Creating new chat...
     </div>
   );
 }

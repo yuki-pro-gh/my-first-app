@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>天気アプリ</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    }
+
+    .card {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    /* ---- ローディング ---- */
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader p { font-size: 15px; color: rgba(255,255,255,0.7); }
+
+    /* ---- 都市検索フォーム ---- */
+    .search-view { display: none; flex-direction: column; align-items: center; gap: 20px; }
+    .search-view h2 { font-size: 20px; font-weight: 600; }
+    .search-view p { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: -12px; }
+    .search-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+    .search-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-row input::placeholder { color: rgba(255,255,255,0.35); }
+    .search-row input:focus { border-color: rgba(255,255,255,0.6); }
+    .search-row button {
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.18);
+      border: 1.5px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .search-row button:hover { background: rgba(255,255,255,0.28); }
+    .candidates {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .candidate-btn {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .candidate-btn:hover { background: rgba(255,255,255,0.16); }
+    .candidate-btn .sub { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .search-error { font-size: 13px; color: rgba(255,120,120,0.9); }
+    .geo-btn {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .geo-btn:hover { color: rgba(255,255,255,0.7); }
+
+    /* ---- 天気コンテンツ ---- */
+    .weather { display: none; }
+    .location {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .date { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 28px; }
+    .weather-icon {
+      font-size: 80px;
+      line-height: 1;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+    }
+    .weather-desc { font-size: 18px; font-weight: 500; color: rgba(255,255,255,0.85); margin-bottom: 20px; }
+    .temp {
+      font-size: 72px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 32px;
+      letter-spacing: -2px;
+    }
+    .temp sup {
+      font-size: 32px;
+      font-weight: 400;
+      vertical-align: top;
+      margin-top: 14px;
+      display: inline-block;
+      opacity: 0.75;
+    }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .stat-label { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+    .stat-value { font-size: 22px; font-weight: 600; }
+    .stat-unit { font-size: 13px; font-weight: 400; opacity: 0.7; margin-left: 2px; }
+    .update-time { margin-top: 24px; font-size: 12px; color: rgba(255,255,255,0.35); }
+    .bottom-btns { display: flex; gap: 8px; justify-content: center; margin-top: 20px; }
+    .action-btn {
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.75);
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .action-btn:hover { background: rgba(255,255,255,0.18); }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ローディング -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <p id="loadMsg">現在地を取得中...</p>
+  </div>
+
+  <!-- 都市検索 -->
+  <div class="search-view" id="searchView">
+    <div style="font-size:40px">🔍</div>
+    <h2>都市を検索</h2>
+    <p id="searchHint">位置情報が使えないため、都市名で検索してください</p>
+    <div class="search-row">
+      <input type="text" id="cityInput" placeholder="例: Tokyo, 大阪, Osaka..." maxlength="60">
+      <button onclick="searchCity()">検索</button>
+    </div>
+    <div class="candidates" id="candidates"></div>
+    <p class="search-error" id="searchError" style="display:none"></p>
+    <button class="geo-btn" onclick="init()">位置情報で再試行</button>
+  </div>
+
+  <!-- 天気 -->
+  <div class="weather" id="weather">
+    <div class="location">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        <circle cx="12" cy="9" r="2.5"/>
+      </svg>
+      <span id="locationName">--</span>
+    </div>
+    <div class="date" id="dateStr">--</div>
+    <div class="weather-icon" id="weatherIcon">--</div>
+    <div class="weather-desc" id="weatherDesc">--</div>
+    <div class="temp" id="temp">--<sup>°C</sup></div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">体感気温</div>
+        <div class="stat-value" id="feelsLike">--<span class="stat-unit">°C</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">風速</div>
+        <div class="stat-value" id="windSpeed">--<span class="stat-unit">km/h</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">湿度</div>
+        <div class="stat-value" id="humidity">--<span class="stat-unit">%</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">降水量</div>
+        <div class="stat-value" id="precipitation">--<span class="stat-unit">mm</span></div>
+      </div>
+    </div>
+    <div class="update-time" id="updateTime"></div>
+    <div class="bottom-btns">
+      <button class="action-btn" onclick="refreshWeather()">更新</button>
+      <button class="action-btn" onclick="showSearch('別の都市を検索')">都市変更</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const WMO = {
+    0:  { label: '快晴',           icon: '☀️' },
+    1:  { label: 'ほぼ晴れ',       icon: '🌤️' },
+    2:  { label: '一部曇り',       icon: '⛅' },
+    3:  { label: '曇り',           icon: '☁️' },
+    45: { label: '霧',             icon: '🌫️' },
+    48: { label: '霧氷',           icon: '🌫️' },
+    51: { label: '霧雨（弱）',     icon: '🌦️' },
+    53: { label: '霧雨',           icon: '🌦️' },
+    55: { label: '霧雨（強）',     icon: '🌧️' },
+    61: { label: '小雨',           icon: '🌧️' },
+    63: { label: '雨',             icon: '🌧️' },
+    65: { label: '大雨',           icon: '🌧️' },
+    71: { label: '小雪',           icon: '🌨️' },
+    73: { label: '雪',             icon: '❄️' },
+    75: { label: '大雪',           icon: '❄️' },
+    77: { label: 'あられ',         icon: '🌨️' },
+    80: { label: 'にわか雨（弱）', icon: '🌦️' },
+    81: { label: 'にわか雨',       icon: '🌧️' },
+    82: { label: 'にわか雨（強）', icon: '⛈️' },
+    85: { label: 'にわか雪',       icon: '🌨️' },
+    86: { label: 'にわか雪（強）', icon: '❄️' },
+    95: { label: '雷雨',           icon: '⛈️' },
+    96: { label: '雷雨＋ひょう',   icon: '⛈️' },
+    99: { label: '雷雨＋大ひょう', icon: '⛈️' },
+  };
+
+  let lastLat = null, lastLon = null, lastPlace = null;
+
+  function show(id) {
+    const map = { loader: 'flex', searchView: 'flex', weather: 'block' };
+    Object.keys(map).forEach(key => {
+      document.getElementById(key).style.display = key === id ? map[key] : 'none';
+    });
+  }
+
+  function showSearch(hint = '位置情報が使えないため、都市名で検索してください') {
+    document.getElementById('searchHint').textContent = hint;
+    document.getElementById('candidates').innerHTML = '';
+    document.getElementById('searchError').style.display = 'none';
+    document.getElementById('cityInput').value = '';
+    show('searchView');
+    setTimeout(() => document.getElementById('cityInput').focus(), 100);
+  }
+
+  // 位置情報で取得を試みる
+  async function init() {
+    show('loader');
+    document.getElementById('loadMsg').textContent = '現在地を取得中...';
+
+    if (!navigator.geolocation) {
+      return showSearch('位置情報非対応ブラウザです。都市名で検索してください');
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        document.getElementById('loadMsg').textContent = '天気データを取得中...';
+        try {
+          const [weatherRes, geoRes] = await Promise.all([
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m,precipitation&timezone=auto`),
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ja`)
+          ]);
+          if (!weatherRes.ok) throw new Error();
+          const weather = await weatherRes.json();
+          const geo = geoRes.ok ? await geoRes.json() : null;
+          let place = '現在地';
+          if (geo?.address) {
+            const a = geo.address;
+            place = a.city || a.town || a.village || a.county || a.state || '現在地';
+          }
+          lastLat = lat; lastLon = lon; lastPlace = place;
+          renderWeather(weather, place);
+        } catch {
+          showSearch('天気データの取得に失敗しました。都市名で検索してください');
+        }
+      },
+      () => showSearch(),
+      { timeout: 8000 }
+    );
+  }
+
+  // 都市名検索
+  async function searchCity() {
+    const query = document.getElementById('cityInput').value.trim();
+    if (!query) return;
+
+    const errEl = document.getElementById('searchError');
+    const candEl = document.getElementById('candidates');
+    errEl.style.display = 'none';
+    candEl.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.5)">検索中...</p>';
+
+    try {
+      const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=ja`);
+      const data = await res.json();
+
+      if (!data.results || data.results.length === 0) {
+        candEl.innerHTML = '';
+        errEl.textContent = '該当する都市が見つかりませんでした。';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      candEl.innerHTML = data.results.map((r, i) => {
+        const sub = [r.admin1, r.country].filter(Boolean).join(', ');
+        return `<button class="candidate-btn" onclick="selectCity(${i})">
+          <div>${escapeHtml(r.name)}</div>
+          <div class="sub">${escapeHtml(sub)}</div>
+        </button>`;
+      }).join('');
+
+      // 候補データを一時保存
+      window._geoResults = data.results;
+    } catch {
+      candEl.innerHTML = '';
+      errEl.textContent = '検索に失敗しました。ネットワーク接続を確認してください。';
+      errEl.style.display = 'block';
+    }
+  }
+
+  async function selectCity(index) {
+    const r = window._geoResults[index];
+    lastLat = r.latitude;
+    lastLon = r.longitude;
+    const sub = [r.admin1, r.country].filter(Boolean).join(' ');
+    lastPlace = sub ? `${r.name}, ${sub}` : r.name;
+
+    show('loader');
+    document.getElementById('loadMsg').textContent = '天気データを取得中...';
+
+    try {
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lastLat}&longitude=${lastLon}&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m,precipitation&timezone=auto`);
+      if (!res.ok) throw new Error();
+      const weather = await res.json();
+      renderWeather(weather, lastPlace);
+    } catch {
+      showSearch('天気データの取得に失敗しました。もう一度お試しください');
+    }
+  }
+
+  async function refreshWeather() {
+    if (!lastLat) return init();
+    show('loader');
+    document.getElementById('loadMsg').textContent = '更新中...';
+    try {
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lastLat}&longitude=${lastLon}&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m,precipitation&timezone=auto`);
+      if (!res.ok) throw new Error();
+      const weather = await res.json();
+      renderWeather(weather, lastPlace);
+    } catch {
+      showSearch('更新に失敗しました。');
+    }
+  }
+
+  function renderWeather(data, place) {
+    const c = data.current;
+    const wmo = WMO[c.weathercode] || { label: '不明', icon: '🌡️' };
+
+    document.getElementById('locationName').textContent = place;
+    document.getElementById('dateStr').textContent = new Date().toLocaleDateString('ja-JP', {
+      year: 'numeric', month: 'long', day: 'numeric', weekday: 'short'
+    });
+    document.getElementById('weatherIcon').textContent = wmo.icon;
+    document.getElementById('weatherDesc').textContent = wmo.label;
+    document.getElementById('temp').innerHTML = `${Math.round(c.temperature_2m)}<sup>°C</sup>`;
+    document.getElementById('feelsLike').innerHTML = `${Math.round(c.apparent_temperature)}<span class="stat-unit">°C</span>`;
+    document.getElementById('windSpeed').innerHTML = `${Math.round(c.windspeed_10m)}<span class="stat-unit">km/h</span>`;
+    document.getElementById('humidity').innerHTML = `${c.relativehumidity_2m}<span class="stat-unit">%</span>`;
+    document.getElementById('precipitation').innerHTML = `${c.precipitation}<span class="stat-unit">mm</span>`;
+    document.getElementById('updateTime').textContent =
+      `最終更新: ${new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`;
+
+    show('weather');
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('searchView').style.display !== 'none') {
+      searchCity();
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>

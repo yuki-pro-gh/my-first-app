@@ -15,6 +15,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prefillText, setPrefillText] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // メッセージ履歴を取得
@@ -23,7 +24,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
     fetch(`/api/sessions/${sessionId}/messages`)
       .then((r) => r.json())
       .then((data) => setMessages(data.messages ?? []))
-      .catch(() => setError("メッセージの読み込みに失敗しました"))
+      .catch(() => setError("Failed to load messages"))
       .finally(() => setFetching(false));
   }, [sessionId]);
 
@@ -41,6 +42,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
 
   async function handleSend(text: string) {
     setError(null);
+    setPrefillText("");
 
     // 楽観的更新：ユーザーメッセージを即時表示
     const tempUserMsg: IMessage = {
@@ -53,7 +55,11 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
     setMessages((prev) => [...prev, tempUserMsg]);
     setLoading(true);
 
-    const history = messages.map((m) => ({ role: m.role, content: m.content }));
+    // Use llamaAnswer for assistant messages to provide cleaner context
+    const history = messages.map((m) => ({
+      role: m.role,
+      content: m.role === "assistant" && m.llamaAnswer ? m.llamaAnswer : m.content,
+    }));
 
     try {
       const res = await fetch("/api/chat", {
@@ -64,7 +70,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? `サーバーエラー (${res.status})`);
+        throw new Error(data.error ?? `Server error (${res.status})`);
       }
 
       const data = await res.json();
@@ -78,7 +84,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
         onTitleChange?.(data.sessionTitle);
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "送信に失敗しました";
+      const msg = err instanceof Error ? err.message : "Failed to send message";
       setError(msg);
       setMessages((prev) => prev.filter((m) => m._id !== tempUserMsg._id));
     } finally {
@@ -88,7 +94,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
 
   return (
     <div className="flex h-full flex-col">
-      {/* エラートースト */}
+      {/* Error toast */}
       {error && (
         <div className="mx-auto mt-2 flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-600 shadow">
           <span>⚠️</span>
@@ -97,28 +103,32 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
         </div>
       )}
 
-      {/* メッセージエリア */}
+      {/* Message area */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="mx-auto max-w-2xl space-y-4">
           {fetching && (
-            <p className="text-center text-sm text-gray-400">読み込み中...</p>
+            <p className="text-center text-sm text-gray-400">Loading...</p>
           )}
 
           {!fetching && messages.length === 0 && (
             <div className="text-center">
               <p className="text-2xl font-semibold text-gray-700">AI Chat</p>
               <p className="mt-2 text-sm text-gray-400">
-                Llama と Qwen が回答し、一致すれば ✅、<br />
-                異なれば ⚠️ で両方の回答を表示します
+                Llama and Qwen answer, ✅ if they agree,<br />
+                ⚠️ shows both answers if they differ
               </p>
             </div>
           )}
 
           {messages.map((m) => (
-            <MessageBubble key={m._id} message={m} />
+            <MessageBubble
+              key={m._id}
+              message={m}
+              onEdit={(text) => setPrefillText(text)}
+            />
           ))}
 
-          {/* ローディングインジケーター */}
+          {/* Loading indicator */}
           {loading && (
             <div className="flex flex-col gap-1">
               <div className="flex justify-start">
@@ -131,7 +141,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
                 </div>
               </div>
               <p className="text-xs text-gray-400 ml-1">
-                2つのAIが回答を検討中...（最大30秒）
+                Two AIs are thinking... (up to 30s)
               </p>
             </div>
           )}
@@ -140,9 +150,9 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
         </div>
       </div>
 
-      {/* 入力欄 */}
+      {/* Input area */}
       <div className="mx-auto w-full max-w-2xl">
-        <ChatInput onSend={handleSend} disabled={loading} />
+        <ChatInput onSend={handleSend} disabled={loading} prefillText={prefillText} />
       </div>
     </div>
   );

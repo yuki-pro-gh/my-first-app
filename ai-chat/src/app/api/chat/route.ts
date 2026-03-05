@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
   });
 
   // セッションのタイトルが未設定なら最初のメッセージから生成
-  if (chatSession.title === "新しいチャット") {
+  if (chatSession.title === "New Chat") {
     chatSession.title = message.slice(0, 40) + (message.length > 40 ? "…" : "");
     await chatSession.save();
   }

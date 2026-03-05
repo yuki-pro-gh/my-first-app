@@ -47,18 +47,18 @@ export function Sidebar({ sessions, onSessionsChange }: SidebarProps) {
 
   return (
     <aside className="flex h-full w-64 flex-col bg-gray-900 text-white">
-      {/* 新規チャットボタン */}
+      {/* New chat button */}
       <div className="p-3">
         <button
           onClick={createSession}
           className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-gray-700 border border-gray-600 transition-colors"
         >
           <span className="text-lg">+</span>
-          新しいチャット
+          New Chat
         </button>
       </div>
 
-      {/* セッション一覧 */}
+      {/* Session list */}
       <nav className="flex-1 overflow-y-auto px-2 pb-2">
         {sessions.map((s) => (
           <div
@@ -83,7 +83,7 @@ export function Sidebar({ sessions, onSessionsChange }: SidebarProps) {
                   onClick={() => renameSession(s._id)}
                   className="text-xs text-green-400 hover:text-green-300"
                 >
-                  保存
+                  Save
                 </button>
               </div>
             ) : (
@@ -95,7 +95,7 @@ export function Sidebar({ sessions, onSessionsChange }: SidebarProps) {
               </button>
             )}
 
-            {/* 操作ボタン（ホバー時表示） */}
+            {/* Action buttons (visible on hover) */}
             {editingId !== s._id && (
               <div className="absolute right-1 top-1/2 hidden -translate-y-1/2 items-center gap-1 group-hover:flex">
                 <button
@@ -104,14 +104,14 @@ export function Sidebar({ sessions, onSessionsChange }: SidebarProps) {
                     setEditingTitle(s.title);
                   }}
                   className="rounded p-1 text-gray-400 hover:text-white"
-                  title="名前を変更"
+                  title="Rename"
                 >
                   ✏️
                 </button>
                 <button
                   onClick={() => deleteSession(s._id)}
                   className="rounded p-1 text-gray-400 hover:text-red-400"
-                  title="削除"
+                  title="Delete"
                 >
                   🗑️
                 </button>
@@ -121,7 +121,7 @@ export function Sidebar({ sessions, onSessionsChange }: SidebarProps) {
         ))}
       </nav>
 
-      {/* ユーザー情報 */}
+      {/* User info */}
       <div className="border-t border-gray-700 p-3">
         <div className="mb-2 flex items-center gap-2">
           {session?.user?.image && (
@@ -140,7 +140,7 @@ export function Sidebar({ sessions, onSessionsChange }: SidebarProps) {
           onClick={() => signOut()}
           className="w-full rounded px-2 py-1 text-left text-xs text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
         >
-          ログアウト
+          Sign out
         </button>
       </div>
     </aside>

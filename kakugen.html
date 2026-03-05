@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>格言アプリ</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0f0f0f;
+      color: #f0e6d3;
+      font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+      cursor: pointer;
+    }
+
+    #kakugen {
+      font-size: 2rem;
+      letter-spacing: 0.15em;
+      text-align: center;
+      padding: 2rem;
+      max-width: 700px;
+      line-height: 1.8;
+      min-height: 3em;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    #kakugen.show {
+      opacity: 1;
+    }
+
+    #hint {
+      margin-top: 3rem;
+      font-size: 0.85rem;
+      color: #666;
+      letter-spacing: 0.2em;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="kakugen"></div>
+  <div id="hint">Enter キーを押す、または画面をクリック</div>
+
+  <script>
+    const KAKUGEN = [
+      "千里の道も一歩から。",
+      "七転び八起き。",
+      "継続は力なり。",
+      "急がば回れ。",
+      "失敗は成功のもと。",
+      "石の上にも三年。",
+      "案ずるより産むが易し。",
+      "雨降って地固まる。",
+      "井の中の蛙大海を知らず。",
+      "禍転じて福となす。",
+      "知らぬが仏。",
+      "時は金なり。",
+      "百聞は一見にしかず。",
+      "類は友を呼ぶ。",
+      "備えあれば憂いなし。",
+      "花より団子。",
+      "口は禍の元。",
+      "縁の下の力持ち。",
+      "出る杭は打たれる。",
+      "終わり良ければすべて良し。",
+    ];
+
+    let last = -1;
+
+    function showKakugen() {
+      let idx;
+      do { idx = Math.floor(Math.random() * KAKUGEN.length); } while (idx === last);
+      last = idx;
+
+      const el = document.getElementById("kakugen");
+      el.classList.remove("show");
+      setTimeout(() => {
+        el.textContent = KAKUGEN[idx];
+        el.classList.add("show");
+      }, 200);
+    }
+
+    document.addEventListener("keydown", e => { if (e.key === "Enter") showKakugen(); });
+    document.addEventListener("click", showKakugen);
+
+    showKakugen();
+  </script>
+</body>
+</html>

@@ -17,7 +17,7 @@ export default function Home() {
   if (status === "loading") {
     return (
       <main className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-gray-400">読み込み中...</div>
+        <div className="text-gray-400">Loading...</div>
       </main>
     );
   }
@@ -27,7 +27,7 @@ export default function Home() {
       <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-md text-center">
         <h1 className="text-2xl font-bold text-gray-900">AI Chat</h1>
         <p className="mt-2 text-sm text-gray-500">
-          マルチモデル合議AIチャット
+          Multi-model AI Chat
         </p>
         <button
           onClick={() => signIn("google")}
@@ -51,7 +51,7 @@ export default function Home() {
               fill="#EA4335"
             />
           </svg>
-          Google でログイン
+          Sign in with Google
         </button>
       </div>
     </main>

@@ -42,7 +42,7 @@ export async function POST() {
 
   const newSession = await ChatSession.create({
     userId: user._id,
-    title: "新しいチャット",
+    title: "New Chat",
   });
 
   return NextResponse.json({ session: newSession }, { status: 201 });

@@ -3,7 +3,7 @@
 ## 概要
 
 小規模チーム向けの汎用会話AIチャットボット。
-ユーザーの質問を **Llama・Qwen の2モデルに並列送信** し、Gemini が一致判定することでハルシネーションを抑制した透明性の高い回答を返す。完全無料で運用可能。
+ユーザーの質問を **Llama・Qwen の2モデルに並列送信** し、Llama が一致判定することでハルシネーションを抑制した透明性の高い回答を返す。完全無料で運用可能。
 
 ---
 
@@ -15,7 +15,7 @@
 | バックエンド | Next.js API Routes |
 | データベース | MongoDB (Mongoose) |
 | 認証 | NextAuth.js + Google OAuth |
-| AIモデル | Groq API（Llama・Qwen）/ Google Gemini API（判定） |
+| AIモデル | Groq API（Llama・Qwen・判定すべて） |
 | デプロイ | Vercel |
 
 ---
@@ -24,7 +24,7 @@
 
 ### 1. マルチモデル合議システム（ハルシネーション抑制）
 
-ユーザーの質問を2つのAIモデルへ並列送信し、Gemini が一致しているかを判定して結果を返す。
+ユーザーの質問を2つのAIモデルへ並列送信し、Llama が一致しているかを判定して結果を返す。
 
 #### 処理フロー
 
@@ -35,16 +35,15 @@
 Llama 3.3 70B  ──┐
                   ├──→ 2つの回答を取得
 Qwen3 32B      ──┘
-                      ├──→ 2つの回答を取得
-Qwen3 32B  ──┘
     ↓
 [一致判定]
-Qwen3 32B が「同じ内容か？YES/NO」だけ判定
-    ↙                    ↘
-一致（YES）           不一致（NO）
-    ↓                       ↓
-1つの回答を表示       両方の回答を並べて表示
-✅ 2つのAIが一致      ⚠️ 回答が異なります
+Llama 3.3 70B が「同じ内容か？YES/NO」だけ判定
+    ↙            ↓            ↘
+一致（YES）   判定失敗(null)   不一致（NO）
+    ↓              ↓               ↓
+両方表示      両方表示          両方表示
+✅ Both AIs  ❓ Could not     ⚠️ Answers
+   agree        judge            differ
 ```
 
 #### AIモデル構成（完全無料）
@@ -59,18 +58,27 @@ Qwen3 32B が「同じ内容か？YES/NO」だけ判定
 
 - 並列送信は `Promise.allSettled()` で失敗を握りつぶさず処理する
 - 各モデルの応答時間が異なるため、タイムアウト（30秒）を設ける
-- Gemini の判定は「YES/NO のみ」を返すシンプルなプロンプト
+- 判定は「YES/NO のみ」を返すシンプルなプロンプト
+- 判定失敗時は `isConsistent = null`（❓ バッジ）として扱う
+- 常に両モデルの回答を表示する（一致時も不一致時も）
+- システムプロンプトで150文字程度の簡潔な回答を指示
 
 ### 2. 会話履歴の保持
 - MongoDB にチャットセッション・メッセージを永続化
 - ユーザーごとに複数チャットセッションを管理
 - サイドバーでセッション一覧を表示・切り替え
 - セッションの削除・リネームが可能
+- 会話履歴はアシスタントの `llamaAnswer` をクリーンな形で渡す
 
 ### 3. Google OAuth 認証
 - NextAuth.js で Google ログインを実装
 - ログイン済みユーザーのみチャット機能へアクセス可能
 - セッション情報はサーバー側で管理
+
+### 4. UI / UX
+- 英語UI
+- スマホ対応（iPhone safe area inset 対応済み）
+- ユーザーメッセージのコピー・編集ボタン（PCはホバー時、モバイルは常時表示）
 
 ---
 
@@ -92,7 +100,7 @@ Qwen3 32B が「同じ内容か？YES/NO」だけ判定
 {
   _id: ObjectId,
   userId: ObjectId,      // User への参照
-  title: string,         // 最初のメッセージから自動生成
+  title: string,         // 最初のメッセージから自動生成（デフォルト: "New Chat"）
   createdAt: Date,
   updatedAt: Date,
 }
@@ -104,10 +112,10 @@ Qwen3 32B が「同じ内容か？YES/NO」だけ判定
   _id: ObjectId,
   sessionId: ObjectId,        // ChatSession への参照
   role: "user" | "assistant",
-  content: string,            // 一致時は共通回答、不一致時は両回答を整形したテキスト
-  isConsistent: boolean,      // 一致したか
+  content: string,            // 一致時は Llama 回答、不一致時は両回答を整形したテキスト
+  isConsistent: boolean | null, // true=一致 / false=不一致 / null=判定失敗
   llamaAnswer: string,        // Llama の生回答
-  mixtralAnswer: string,      // Qwen の生回答
+  mixtralAnswer: string,      // Qwen の生回答（フィールド名は mixtralAnswer のまま）
   createdAt: Date,
 }
 ```
@@ -131,8 +139,8 @@ src/
 ├── components/
 │   ├── ChatLayoutClient.tsx     # サイドバー + メインレイアウト
 │   ├── ChatWindow.tsx           # メッセージ一覧・送信ロジック
-│   ├── MessageBubble.tsx        # メッセージ表示（一致/不一致で表示変更）
-│   ├── ChatInput.tsx            # テキスト入力
+│   ├── MessageBubble.tsx        # メッセージ表示（コピー/編集ボタン付き）
+│   ├── ChatInput.tsx            # テキスト入力（safe area 対応）
 │   ├── Sidebar.tsx              # セッション一覧・削除・リネーム
 │   └── SessionProvider.tsx      # NextAuth SessionProvider
 ├── lib/
@@ -141,10 +149,9 @@ src/
 │   ├── env.ts                   # 環境変数チェック
 │   ├── models/                  # Mongoose モデル定義
 │   └── ai/
-│       ├── openai.ts            # Llama 3.3 70B（Groq経由）
-│       ├── gemini.ts            # Gemini（一致判定・回答者）
+│       ├── openai.ts            # Llama 3.3 70B（回答者1）
 │       ├── claude.ts            # Qwen3 32B（回答者2）
-│       ├── judge.ts             # 一致判定ロジック（Geminiを呼び出す）
+│       ├── judge.ts             # 一致判定ロジック（Llama 3.3 70B）
 │       └── orchestrator.ts      # 並列送信・フロー制御
 └── types/
     └── index.ts
@@ -168,7 +175,6 @@ GOOGLE_CLIENT_SECRET=
 
 # AI API Keys
 GROQ_API_KEY=
-GEMINI_API_KEY=
 ```
 
 ---
@@ -177,17 +183,23 @@ GEMINI_API_KEY=
 
 ### orchestrator.ts の責務
 1. Llama と Qwen へ `Promise.allSettled()` で並列送信
-2. Gemini で一致判定（YES/NO）
-3. 一致 → 共通回答を返す / 不一致 → 両回答を並べて返す
+2. Llama で一致判定（YES/NO）
+3. 一致・不一致・判定失敗いずれも両回答を返す
 
-### judge.ts（gemini.ts）の責務
-- プロンプト：「2つの回答は同じ内容か？YESまたはNOだけ答えよ」
-- シンプルな YES/NO 判定のみ
+### judge.ts の責務
+- プロンプト：「事実や概要が矛盾していなければYES、明らかに矛盾する場合のみNO」
+- シンプルな YES/NO 判定のみ（Llama 3.3 70B 使用）
 
 ### UI の表示方針
-- **一致時**：✅ バッジ + 1つの回答を表示
-- **不一致時**：⚠️ バッジ + 【Llamaの回答】【Qwenの回答】を並べて表示
+- **一致時**：✅ Both AIs agree + 両方の回答を表示
+- **不一致時**：⚠️ Answers differ + 両方の回答を表示
+- **判定失敗時**：❓ Could not judge + 両方の回答を表示
 - ユーザーが自分で判断できる透明な設計
+
+### システムプロンプト
+```
+Please answer concisely in approximately 150 characters. Provide key points only, omitting unnecessary explanations.
+```
 
 ---
 

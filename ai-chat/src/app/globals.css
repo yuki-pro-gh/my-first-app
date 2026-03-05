@@ -7,6 +7,7 @@ body {
   height: 100%;
   height: -webkit-fill-available;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 /* Prevent iOS Safari from zooming on input focus */

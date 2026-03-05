@@ -93,7 +93,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       {/* Error toast */}
       {error && (
         <div className="mx-auto mt-2 flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-600 shadow">
@@ -104,7 +104,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
       )}
 
       {/* Message area */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         <div className="mx-auto max-w-2xl space-y-4">
           {fetching && (
             <p className="text-center text-sm text-gray-400">Loading...</p>

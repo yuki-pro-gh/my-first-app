@@ -45,8 +45,8 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
 
       {/* メインエリア */}
       <main className="flex flex-1 flex-col overflow-hidden">
-        {/* ヘッダーバー（常時表示） */}
-        <div className="flex items-center border-b border-gray-200 px-4 py-3">
+        {/* ヘッダーバー（固定） */}
+        <div className="sticky top-0 z-50 flex flex-shrink-0 items-center border-b border-gray-200 bg-white px-4 py-3">
           <button
             onClick={() => setSidebarOpen(true)}
             className="rounded p-1 text-gray-500 hover:bg-gray-100 md:hidden"

@@ -44,9 +44,12 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* メインエリア */}
-      <main className="flex flex-1 flex-col overflow-hidden">
-        {/* ヘッダーバー（固定） */}
-        <div className="sticky top-0 z-50 flex flex-shrink-0 items-center border-b border-gray-200 bg-white px-4 py-3">
+      <main
+        className="flex-1 overflow-hidden"
+        style={{ display: 'grid', gridTemplateRows: 'auto 1fr' }}
+      >
+        {/* ヘッダー（固定） */}
+        <div className="flex items-center border-b border-gray-200 bg-white px-4 py-3">
           <button
             onClick={() => setSidebarOpen(true)}
             className="rounded p-1 text-gray-500 hover:bg-gray-100 md:hidden"
@@ -59,7 +62,7 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
           <span className="ml-3 text-sm font-semibold text-gray-800 md:ml-0">Hallucination Check</span>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="overflow-hidden">
           {children}
         </div>
       </main>

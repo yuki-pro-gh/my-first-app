@@ -18,7 +18,6 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
   const [prefillText, setPrefillText] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // メッセージ履歴を取得
   useEffect(() => {
     setFetching(true);
     fetch(`/api/sessions/${sessionId}/messages`)
@@ -28,12 +27,10 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
       .finally(() => setFetching(false));
   }, [sessionId]);
 
-  // 末尾に自動スクロール
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // エラーは5秒後に自動で消す
   useEffect(() => {
     if (!error) return;
     const t = setTimeout(() => setError(null), 5000);
@@ -44,7 +41,6 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
     setError(null);
     setPrefillText("");
 
-    // 楽観的更新：ユーザーメッセージを即時表示
     const tempUserMsg: IMessage = {
       _id: `temp-${Date.now()}`,
       sessionId,
@@ -55,7 +51,6 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
     setMessages((prev) => [...prev, tempUserMsg]);
     setLoading(true);
 
-    // Use llamaAnswer for assistant messages to provide cleaner context
     const history = messages.map((m) => ({
       role: m.role,
       content: m.role === "assistant" && m.llamaAnswer ? m.llamaAnswer : m.content,
@@ -93,18 +88,21 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
   }
 
   return (
-    <div className="h-full overflow-hidden" style={{ display: 'grid', gridTemplateRows: '1fr auto' }}>
-      {/* Message area (row 1) */}
-      <div className="overflow-y-auto px-4 py-3">
-        {/* Error toast */}
-        {error && (
-          <div className="mx-auto mb-2 flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-600 shadow">
-            <span>⚠️</span>
-            <span>{error}</span>
-            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">✕</button>
-          </div>
-        )}
+    // position: absolute で親コンテナをぴったり埋める
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column' }}>
+
+      {/* メッセージエリア（スクロール可能） */}
+      <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties} className="px-4 py-3">
         <div className="mx-auto max-w-2xl space-y-4">
+          {/* Error toast */}
+          {error && (
+            <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-600 shadow">
+              <span>⚠️</span>
+              <span>{error}</span>
+              <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">✕</button>
+            </div>
+          )}
+
           {fetching && (
             <p className="text-center text-sm text-gray-400">Loading...</p>
           )}
@@ -127,7 +125,6 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
             />
           ))}
 
-          {/* Loading indicator */}
           {loading && (
             <div className="flex flex-col gap-1">
               <div className="flex justify-start">
@@ -149,8 +146,8 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
         </div>
       </div>
 
-      {/* Input area (footer) */}
-      <div className="w-full">
+      {/* フッター（常に下部固定） */}
+      <div style={{ flexShrink: 0 }}>
         <ChatInput onSend={handleSend} disabled={loading} prefillText={prefillText} />
       </div>
     </div>

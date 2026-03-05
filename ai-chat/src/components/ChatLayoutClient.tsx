@@ -19,7 +19,7 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
   }, [fetchSessions]);
 
   return (
-    <div className="flex h-full overflow-hidden bg-white">
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', overflow: 'hidden', background: 'white' }}>
       {/* モバイル：オーバーレイ */}
       {sidebarOpen && (
         <div
@@ -44,12 +44,9 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* メインエリア */}
-      <main
-        className="flex-1 overflow-hidden"
-        style={{ display: 'grid', gridTemplateRows: 'auto 1fr' }}
-      >
-        {/* ヘッダー（固定） */}
-        <div className="flex items-center border-b border-gray-200 bg-white px-4 py-3">
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+        {/* ヘッダー（常に上部固定） */}
+        <div style={{ flexShrink: 0 }} className="flex items-center border-b border-gray-200 bg-white px-4 py-3 z-10">
           <button
             onClick={() => setSidebarOpen(true)}
             className="rounded p-1 text-gray-500 hover:bg-gray-100 md:hidden"
@@ -62,10 +59,11 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
           <span className="ml-3 text-sm font-semibold text-gray-800 md:ml-0">Hallucination Check</span>
         </div>
 
-        <div className="h-full overflow-hidden">
+        {/* コンテンツエリア（残りのスペースを占有） */}
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
           {children}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

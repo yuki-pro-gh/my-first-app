@@ -19,7 +19,7 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
   }, [fetchSessions]);
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-white">
+    <div className="fixed inset-0 flex overflow-hidden bg-white">
       {/* モバイル：オーバーレイ */}
       {sidebarOpen && (
         <div

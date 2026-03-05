@@ -2,8 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  overflow-x: hidden;
+html,
+body {
+  height: 100%;
+  height: -webkit-fill-available;
+  overflow: hidden;
 }
 
 /* Prevent iOS Safari from zooming on input focus */

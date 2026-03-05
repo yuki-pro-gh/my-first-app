@@ -19,7 +19,7 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
   }, [fetchSessions]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div className="flex h-dvh overflow-hidden bg-white">
       {/* モバイル：オーバーレイ */}
       {sidebarOpen && (
         <div
@@ -45,18 +45,18 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
 
       {/* メインエリア */}
       <main className="flex flex-1 flex-col overflow-hidden">
-        {/* モバイル：ヘッダーバー */}
-        <div className="flex items-center border-b border-gray-200 px-4 py-2 md:hidden">
+        {/* ヘッダーバー（常時表示） */}
+        <div className="flex items-center border-b border-gray-200 px-4 py-3">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="rounded p-1 text-gray-500 hover:bg-gray-100"
+            className="rounded p-1 text-gray-500 hover:bg-gray-100 md:hidden"
             aria-label="Open menu"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="ml-3 text-sm font-medium text-gray-700">Hallucination Check</span>
+          <span className="ml-3 text-sm font-semibold text-gray-800 md:ml-0">Hallucination Check</span>
         </div>
 
         {children}

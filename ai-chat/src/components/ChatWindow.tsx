@@ -151,7 +151,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
       </div>
 
       {/* Input area */}
-      <div className="w-full">
+      <div className="w-full flex-shrink-0">
         <ChatInput onSend={handleSend} disabled={loading} prefillText={prefillText} />
       </div>
     </div>

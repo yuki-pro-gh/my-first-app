@@ -62,7 +62,7 @@ export function ChatLayoutClient({ children }: { children: React.ReactNode }) {
           <span className="ml-3 text-sm font-semibold text-gray-800 md:ml-0">Hallucination Check</span>
         </div>
 
-        <div className="overflow-hidden">
+        <div className="h-full overflow-hidden">
           {children}
         </div>
       </main>

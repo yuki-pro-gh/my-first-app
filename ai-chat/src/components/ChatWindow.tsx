@@ -94,17 +94,16 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
 
   return (
     <div className="h-full overflow-hidden" style={{ display: 'grid', gridTemplateRows: '1fr auto' }}>
-      {/* Error toast */}
-      {error && (
-        <div className="mx-auto mt-2 flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-600 shadow">
-          <span>⚠️</span>
-          <span>{error}</span>
-          <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">✕</button>
-        </div>
-      )}
-
-      {/* Message area */}
+      {/* Message area (row 1) */}
       <div className="overflow-y-auto px-4 py-3">
+        {/* Error toast */}
+        {error && (
+          <div className="mx-auto mb-2 flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-600 shadow">
+            <span>⚠️</span>
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">✕</button>
+          </div>
+        )}
         <div className="mx-auto max-w-2xl space-y-4">
           {fetching && (
             <p className="text-center text-sm text-gray-400">Loading...</p>

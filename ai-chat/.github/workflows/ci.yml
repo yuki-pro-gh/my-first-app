@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - run: npm install
+
+      - run: npm test
+        env:
+          MONGODB_URI: dummy
+          NEXTAUTH_SECRET: dummy
+          NEXTAUTH_URL: http://localhost:3000
+          GOOGLE_CLIENT_ID: dummy
+          GOOGLE_CLIENT_SECRET: dummy
+          GROQ_API_KEY: dummy
+          GEMINI_API_KEY: dummy

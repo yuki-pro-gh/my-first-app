@@ -59,7 +59,7 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
           <div className="flex items-center gap-2">
             {isConsistent === true && (
               <span className="rounded-full border bg-green-100 text-green-700 border-green-200 px-2 py-0.5 text-xs font-medium">
-                ✅ Both AIs agree
+                ✅ All AIs agree
               </span>
             )}
             {isConsistent === false && (

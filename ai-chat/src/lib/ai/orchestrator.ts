@@ -60,7 +60,7 @@ export async function orchestrate(
   let isConsistent: boolean | null = null;
   try {
     isConsistent = await withTimeout(
-      judgeConsistency(question, llamaAnswer, mixtralAnswer),
+      judgeConsistency(question, llamaAnswer, mixtralAnswer, geminiAnswer),
       TIMEOUT_MS
     );
   } catch {

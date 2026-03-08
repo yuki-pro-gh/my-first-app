@@ -18,7 +18,7 @@ export async function askGPT(
 ): Promise<string> {
   const locationNote = location ? ` The user is currently in ${location}.` : "";
   const messages = [
-    { role: "system" as const, content: `Please answer concisely in approximately 150 characters. Provide key points only, omitting unnecessary explanations.${locationNote}` },
+    { role: "system" as const, content: `Please answer concisely in approximately 250 characters. Provide key points only, omitting unnecessary explanations.${locationNote}` },
     ...history.map((m) => ({ role: m.role, content: m.content })),
     { role: "user" as const, content: question },
   ];

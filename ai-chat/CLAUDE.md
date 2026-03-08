@@ -117,26 +117,35 @@ GitHubへのプッシュを契機に自動で起動
   ↓
 仮想マシンにGitHubサーバからコードをダウンロード
   ↓
-npm install（package.json の依存パッケージを一括インストール）
-※ キャッシュがあれば毎回フルではない
+npm install
+│ npmとはNode.js用パッケージ管理ツール
+│ Next.js・Mongoose・Groq SDKなどpackage.jsonの一覧を一括インストール
+│ ※キャッシュ(DISKだけど)があれば毎回フルインストールではない
   ↓
-npm test（テストを自動実行）
+npm test（テストを自動実行。ユニットテストのみ。E2Eテストは一旦手動で）
   ↓
-  ├── テスト失敗 → 止まる・登録メールに通知
+  ├── テスト失敗 → 止まる・メールで通知
   │                Vercelにはデプロイされない
   │
   └── テスト合格
           ↓
 ━━━━━━━━━━━━━━━━━━━━━━━
-【GitHub Actions（CD）】deploy ジョブ
+【GitHub Actions（CD）】deploy ジョブ（親）
 test ジョブ合格後に自動で起動
   ↓
-Vercel CLI（子）を呼び出してデプロイ
+npm install
   ↓
-TypeScript → JavaScript に変換（ビルド）
-※ 型情報を除去するだけ（機械語変換ではない）
+Vercel CLI を使ってビルド
+│ TypeScript → JavaScript に変換
+│ ※ 型情報を除去するだけ（機械語変換ではない）
   ↓
-Vercel 本番環境にデプロイ
+ビルド済みファイルを Vercel（子）にアップロード
+  ↓
+━━━━━━━━━━━━━━━━━━━━━━━
+【Vercel】
+アップロードされたファイルを本番環境に配置
+  ↓
+JavaScript を Node.js がインタープリタで実行
   ↓
 ユーザーが新機能を使える
 ━━━━━━━━━━━━━━━━━━━━━━━

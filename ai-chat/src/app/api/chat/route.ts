@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
     isConsistent: result.isConsistent,
     llamaAnswer: result.llamaAnswer,
     mixtralAnswer: result.mixtralAnswer,
+    geminiAnswer: result.geminiAnswer,
   });
 
   // セッションのタイトルが未設定なら最初のメッセージから生成

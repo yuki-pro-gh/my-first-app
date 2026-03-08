@@ -33,12 +33,18 @@ ${answer2}`;
   return text.startsWith("YES");
 }
 
-// Geminiに回答させる（将来の拡張用）
 export async function askGemini(
   question: string,
-  history: Message[] = []
+  history: Message[] = [],
+  location?: string
 ): Promise<string> {
-  const model = client.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const locationNote = location ? ` The user is currently in ${location}.` : "";
+  const systemInstruction = `Please answer concisely in approximately 250 characters. Provide key points only, omitting unnecessary explanations.${locationNote}`;
+
+  const model = client.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    systemInstruction,
+  });
 
   const chat = model.startChat({
     history: history.map((m) => ({

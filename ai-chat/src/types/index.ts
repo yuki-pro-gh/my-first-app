@@ -26,7 +26,8 @@ export interface IMessage {
   content: string;            // 表示用テキスト
   isConsistent?: boolean | null; // assistant のみ：true=一致 / false=不一致 / null=判定失敗
   llamaAnswer?: string;       // assistant のみ：Llama の生回答
-  mixtralAnswer?: string;     // assistant のみ：Mixtral の生回答
+  mixtralAnswer?: string;     // assistant のみ：Qwen の生回答
+  geminiAnswer?: string;      // assistant のみ：Gemini の生回答
   createdAt: Date;
 }
 
@@ -36,6 +37,7 @@ export interface OrchestratorResult {
   content: string;        // 一致時は共通回答、不一致時は整形済みテキスト
   llamaAnswer: string;
   mixtralAnswer: string;
+  geminiAnswer: string;
 }
 
 // ===== API リクエスト / レスポンス =====

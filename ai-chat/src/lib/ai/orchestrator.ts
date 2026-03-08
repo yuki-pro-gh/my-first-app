@@ -1,5 +1,6 @@
 import { askGPT } from "./openai";       // Llama 3.3 70B
-import { askClaude } from "./claude";     // Gemini 1.5 Flash
+import { askClaude } from "./claude";     // Qwen3 32B
+import { askGemini } from "./gemini";     // Gemini 2.0 Flash
 import { judgeConsistency } from "./judge";
 import type { OrchestratorResult, MessageRole } from "@/types";
 
@@ -22,10 +23,11 @@ export async function orchestrate(
   history: Message[] = [],
   location?: string
 ): Promise<OrchestratorResult> {
-  // Llama と Gemini に並列送信
-  const [llamaResult, mixtralResult] = await Promise.allSettled([
+  // Llama・Qwen・Gemini に並列送信
+  const [llamaResult, mixtralResult, geminiResult] = await Promise.allSettled([
     withTimeout(askGPT(question, history, location), TIMEOUT_MS),
     withTimeout(askClaude(question, history, location), TIMEOUT_MS),
+    withTimeout(askGemini(question, history, location), TIMEOUT_MS),
   ]);
 
   const llamaAnswer =
@@ -38,13 +40,19 @@ export async function orchestrate(
       ? mixtralResult.value
       : "Qwen からの回答取得に失敗しました。";
 
-  // 両方失敗した場合
-  if (llamaResult.status === "rejected" && mixtralResult.status === "rejected") {
+  const geminiAnswer =
+    geminiResult.status === "fulfilled"
+      ? geminiResult.value
+      : "Gemini からの回答取得に失敗しました。";
+
+  // 全部失敗した場合
+  if (llamaResult.status === "rejected" && mixtralResult.status === "rejected" && geminiResult.status === "rejected") {
     return {
       isConsistent: false,
       content: "AIモデルへの接続に失敗しました。しばらくしてから再度お試しください。",
       llamaAnswer,
       mixtralAnswer,
+      geminiAnswer,
     };
   }
 
@@ -61,30 +69,30 @@ export async function orchestrate(
   }
 
   if (isConsistent === true) {
-    // 一致 → Llama の回答を代表として返す
     return {
       isConsistent: true,
       content: llamaAnswer,
       llamaAnswer,
       mixtralAnswer,
+      geminiAnswer,
     };
   } else if (isConsistent === false) {
-    // 不一致 → 両回答を並べたテキストを返す
     const content = `【Llama の回答】\n${llamaAnswer}\n\n【Qwen の回答】\n${mixtralAnswer}`;
     return {
       isConsistent: false,
       content,
       llamaAnswer,
       mixtralAnswer,
+      geminiAnswer,
     };
   } else {
-    // 判定失敗 → 両回答を表示し判定不能を伝える
     const content = `【Llama の回答】\n${llamaAnswer}\n\n【Qwen の回答】\n${mixtralAnswer}`;
     return {
       isConsistent: null,
       content,
       llamaAnswer,
       mixtralAnswer,
+      geminiAnswer,
     };
   }
 }

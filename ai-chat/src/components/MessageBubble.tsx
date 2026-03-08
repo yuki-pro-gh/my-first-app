@@ -49,7 +49,7 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
     );
   }
 
-  const { isConsistent, llamaAnswer, mixtralAnswer } = message;
+  const { isConsistent, llamaAnswer, mixtralAnswer, geminiAnswer } = message;
 
   return (
     <div className="flex justify-start">
@@ -75,7 +75,7 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
           </div>
         )}
 
-        {/* Always show both answers */}
+        {/* Always show all answers */}
         {llamaAnswer && mixtralAnswer ? (
           <div className="space-y-2">
             <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800">
@@ -86,6 +86,12 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
               <div className="mb-1 text-xs font-semibold text-gray-500">Qwen3 32B (Alibaba / Groq)</div>
               <p className="whitespace-pre-wrap">{mixtralAnswer}</p>
             </div>
+            {geminiAnswer && (
+              <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-gray-800">
+                <div className="mb-1 text-xs font-semibold text-blue-500">Gemini 2.0 Flash (Google)</div>
+                <p className="whitespace-pre-wrap">{geminiAnswer}</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="rounded-2xl rounded-tl-sm bg-gray-100 px-4 py-3 text-sm text-gray-800 whitespace-pre-wrap">

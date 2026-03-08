@@ -8,6 +8,7 @@ export interface IMessageDocument extends Document {
   isConsistent?: boolean;
   llamaAnswer?: string;
   mixtralAnswer?: string;
+  geminiAnswer?: string;
   createdAt: Date;
 }
 
@@ -19,6 +20,7 @@ const MessageSchema = new Schema<IMessageDocument>(
     isConsistent: { type: Boolean },
     llamaAnswer: { type: String },
     mixtralAnswer: { type: String },
+    geminiAnswer: { type: String },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

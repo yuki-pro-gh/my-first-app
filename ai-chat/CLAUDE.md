@@ -95,6 +95,61 @@ GOOGLE_CLIENT_ID  GOOGLE_CLIENT_SECRET  GROQ_API_KEY
 - `ChatLayoutClient`: `position: fixed; inset: 0`
 - `ChatWindow`: `position: absolute; inset: 0` + flex column + `-webkit-overflow-scrolling: touch`
 
+## CI/CD フロー
+
+```
+【開発者】
+コードを修正（TypeScript）
+  ↓
+GitHubにプッシュ
+  $ git push origin main
+  意味：MacBookのmainブランチを
+        GitHubのmainブランチに送る
+  origin = https://github.com/yuki-pro-gh/my-first-app
+  main   = ブランチ名（本番コード）
+  ↓
+━━━━━━━━━━━━━━━━━━━━━━━
+【GitHub Actions（CI）】
+GitHubへのプッシュを契機に自動で起動
+※ .github/workflows/ci.yml に設定を記述
+  ↓
+GitHub Actions用の仮想マシンに
+GitHubサーバからコードをダウンロード
+  ↓
+npm install
+│ Node.js用パッケージ管理ツール
+│ Next.js・Mongoose・Groq SDKなど
+│ package.jsonの一覧を一括インストール
+│ ※キャッシュがあれば毎回フルではない
+  ↓
+npm test（テストを自動実行）
+  ↓
+  ├── テスト失敗 → 止まる・メールで通知
+  │                Vercelにはデプロイされない
+  │
+  └── テスト合格
+          ↓
+      GitHubサーバがVercelにWebhookで通知
+      （「テスト合格したよ、デプロイしていいよ」）
+          ↓
+━━━━━━━━━━━━━━━━━━━━━━━
+【Vercel（CD）】Webhookを受けて起動
+  ↓
+npm install
+  ↓
+TypeScript → JavaScript に変換（ビルド）
+※ 型情報を除去するだけ（機械語変換ではない）
+  ↓
+JavaScript を Node.js がインタープリタで実行
+  ↓
+本番環境にデプロイ
+  ↓
+ユーザーが新機能を使える
+━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+※ 現状はCIなし。プッシュ → Vercel が直接デプロイ。
+
 ## デプロイ
 GitHub push → Vercel 自動デプロイ。Function タイムアウト: 60 秒 (`vercel.json`)。
 Google OAuth リダイレクト URI に本番 URL を追加すること。

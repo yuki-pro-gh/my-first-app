@@ -97,6 +97,9 @@ GOOGLE_CLIENT_ID  GOOGLE_CLIENT_SECRET  GROQ_API_KEY
 
 ## CI/CD フロー
 
+設定ファイル: `.github/workflows/ci.yml`
+結果確認: GitHub Actions タブ（test / deploy ジョブ両方確認可能）
+
 ```
 【開発者】
 コードを修正（TypeScript）
@@ -109,47 +112,44 @@ GitHubにプッシュ
   main   = ブランチ名（本番コード）
   ↓
 ━━━━━━━━━━━━━━━━━━━━━━━
-【GitHub Actions（CI）】
+【GitHub Actions（CI）】test ジョブ
 GitHubへのプッシュを契機に自動で起動
-※ .github/workflows/ci.yml に設定を記述
   ↓
-GitHub Actions用の仮想マシンに
-GitHubサーバからコードをダウンロード
+仮想マシンにGitHubサーバからコードをダウンロード
   ↓
-npm install
-│ Node.js用パッケージ管理ツール
-│ Next.js・Mongoose・Groq SDKなど
-│ package.jsonの一覧を一括インストール
-│ ※キャッシュがあれば毎回フルではない
+npm install（package.json の依存パッケージを一括インストール）
+※ キャッシュがあれば毎回フルではない
   ↓
 npm test（テストを自動実行）
   ↓
-  ├── テスト失敗 → 止まる・メールで通知
+  ├── テスト失敗 → 止まる・登録メールに通知
   │                Vercelにはデプロイされない
   │
   └── テスト合格
           ↓
-      GitHubサーバがVercelにWebhookで通知
-      （「テスト合格したよ、デプロイしていいよ」）
-          ↓
 ━━━━━━━━━━━━━━━━━━━━━━━
-【Vercel（CD）】Webhookを受けて起動
+【GitHub Actions（CD）】deploy ジョブ
+test ジョブ合格後に自動で起動
   ↓
-npm install
+Vercel CLI（子）を呼び出してデプロイ
   ↓
 TypeScript → JavaScript に変換（ビルド）
 ※ 型情報を除去するだけ（機械語変換ではない）
   ↓
-JavaScript を Node.js がインタープリタで実行
-  ↓
-本番環境にデプロイ
+Vercel 本番環境にデプロイ
   ↓
 ユーザーが新機能を使える
 ━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-※ 現状はCIなし。プッシュ → Vercel が直接デプロイ。
+## テスト
+```
+__tests__/env.test.ts          - 環境変数チェック（2件）
+__tests__/orchestrator.test.ts - AI並列処理ロジック（4件）
+__tests__/geolocation.test.ts  - 位置情報逆ジオコーディング（3件）
+```
 
 ## デプロイ
-GitHub push → Vercel 自動デプロイ。Function タイムアウト: 60 秒 (`vercel.json`)。
+GitHub Actions 経由で Vercel にデプロイ（CI通過後のみ）。
+Function タイムアウト: 60 秒 (`vercel.json`)。
 Google OAuth リダイレクト URI に本番 URL を追加すること。

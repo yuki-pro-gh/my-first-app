@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
 import type { IMessage } from "@/types";
+import { reverseGeocode } from "@/lib/geolocation";
 
 interface ChatWindowProps {
   sessionId: string;
@@ -24,13 +25,8 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const { latitude, longitude } = pos.coords;
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-        );
-        const data = await res.json();
-        const city = data.address?.city ?? data.address?.town ?? data.address?.county ?? "";
-        const country = data.address?.country ?? "";
-        if (city || country) setLocation([city, country].filter(Boolean).join(", "));
+        const loc = await reverseGeocode(latitude, longitude);
+        if (loc) setLocation(loc);
       } catch {
         // 位置情報取得失敗は無視
       }

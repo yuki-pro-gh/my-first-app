@@ -1,4 +1,4 @@
-# AI Chat — プロジェクト仕様
+# Hallucination Check — プロジェクト仕様
 
 ## 概要
 
@@ -79,6 +79,10 @@ Llama 3.3 70B が「同じ内容か？YES/NO」だけ判定
 - 英語UI
 - スマホ対応（iPhone safe area inset 対応済み）
 - ユーザーメッセージのコピー・編集ボタン（PCはホバー時、モバイルは常時表示）
+- iOS Safari レイアウト固定：`position: fixed` でヘッダー・フッターを常時表示
+  - `ChatLayoutClient.tsx`：外側コンテナに `position: fixed; inset: 0`
+  - `ChatWindow.tsx`：`position: absolute; inset: 0` + flex column でメッセージエリアをスクロール可能に
+  - `-webkit-overflow-scrolling: touch` でiOSのモーメンタムスクロールを有効化
 
 ---
 

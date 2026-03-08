@@ -1,48 +1,48 @@
-# Hallucination Check — Project Spec
+# Hallucination Check — プロジェクト仕様
 
-## Overview
-Multi-model AI chat. Sends user questions to Llama + Qwen in parallel; Llama judges consistency to reduce hallucinations. Fully free to operate.
+## 概要
+質問を Llama + Qwen に並列送信し、Llama が一致を判定することでハルシネーションを抑制する。完全無料。
 
-## Stack
+## スタック
 Next.js 16 (App Router) / TypeScript / Tailwind — MongoDB (Mongoose) — NextAuth.js + Google OAuth — Groq API — Vercel
 
-## AI Flow
+## AI フロー
 ```
-User question → [parallel] Llama 3.3 70B + Qwen3 32B → Llama judges YES/NO
-  ✅ agree  /  ⚠️ differ  /  ❓ could not judge  → always show both answers
+ユーザー質問 → [並列] Llama 3.3 70B + Qwen3 32B → Llama が YES/NO 判定
+  ✅ agree  /  ⚠️ differ  /  ❓ could not judge  → 常に両回答を表示
 ```
-- Models: Llama 3.3 70B (answerer + judge), Qwen3 32B (answerer)
-- `Promise.allSettled()` — 30s timeout — `isConsistent: boolean | null`
-- System prompt: `"Please answer concisely in approximately 150 characters."`
-- History: pass `llamaAnswer` (not formatted string) for clean context
+- `Promise.allSettled()` — タイムアウト 30 秒 — `isConsistent: boolean | null`
+- システムプロンプト: `"Please answer concisely in approximately 150 characters."`
+- 会話履歴: `llamaAnswer` をそのまま渡す（整形済み文字列は使わない）
 
-## Data Models
+## データモデル
 ```ts
 User:        { email, name, image, createdAt }
 ChatSession: { userId, title, createdAt, updatedAt }
 Message:     { sessionId, role, content, isConsistent, llamaAnswer, mixtralAnswer, createdAt }
+// mixtralAnswer は Qwen の回答（フィールド名は変更しない）
 ```
-Note: `mixtralAnswer` field stores Qwen's answer (legacy name).
 
-## Directory
+## ディレクトリ
 ```
 src/
-├── app/api/          auth / chat / sessions
-├── app/chat/         layout.tsx  page.tsx  [sessionId]/
-├── components/       ChatLayoutClient  ChatWindow  MessageBubble  ChatInput  Sidebar
-└── lib/ai/           openai.ts(Llama)  claude.ts(Qwen)  judge.ts  orchestrator.ts
+├── app/api/      auth / chat / sessions
+├── app/chat/     layout.tsx  page.tsx  [sessionId]/
+├── components/   ChatLayoutClient  ChatWindow  MessageBubble  ChatInput  Sidebar
+└── lib/ai/       openai.ts(Llama)  claude.ts(Qwen)  judge.ts  orchestrator.ts
 ```
 
-## Env Vars
+## 環境変数
 ```
 MONGODB_URI  NEXTAUTH_SECRET  NEXTAUTH_URL
 GOOGLE_CLIENT_ID  GOOGLE_CLIENT_SECRET  GROQ_API_KEY
 ```
 
-## iOS Layout
-Fixed header/footer on iOS Safari via:
+## iOS レイアウト
+ヘッダー・フッター固定の実装方法:
 - `ChatLayoutClient`: `position: fixed; inset: 0`
 - `ChatWindow`: `position: absolute; inset: 0` + flex column + `-webkit-overflow-scrolling: touch`
 
-## Deploy
-Vercel auto-deploys from GitHub push. Function timeout: 60s (`vercel.json`). Add prod URL to Google OAuth redirect URIs.
+## デプロイ
+GitHub push → Vercel 自動デプロイ。Function タイムアウト: 60 秒 (`vercel.json`)。
+Google OAuth リダイレクト URI に本番 URL を追加すること。

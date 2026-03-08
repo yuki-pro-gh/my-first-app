@@ -88,7 +88,7 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
             </div>
             {geminiAnswer && (
               <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-gray-800">
-                <div className="mb-1 text-xs font-semibold text-blue-500">Gemini 2.0 Flash (Google)</div>
+                <div className="mb-1 text-xs font-semibold text-blue-500">Gemini 2.5 Flash (Google)</div>
                 <p className="whitespace-pre-wrap">{geminiAnswer}</p>
               </div>
             )}

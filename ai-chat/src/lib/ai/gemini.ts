@@ -14,7 +14,7 @@ export async function judgeWithGemini(
   answer1: string,
   answer2: string
 ): Promise<boolean> {
-  const model = client.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = client.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const prompt = `以下の2つのAI回答は、同じ内容を述べていますか？
 YESまたはNOだけ答えてください。それ以外のテキストは含めないでください。
@@ -42,7 +42,7 @@ export async function askGemini(
   const systemInstruction = `Please answer concisely in approximately 250 characters. Provide key points only, omitting unnecessary explanations.${locationNote}`;
 
   const model = client.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     systemInstruction,
   });
 

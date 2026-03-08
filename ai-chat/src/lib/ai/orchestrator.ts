@@ -19,12 +19,13 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 
 export async function orchestrate(
   question: string,
-  history: Message[] = []
+  history: Message[] = [],
+  location?: string
 ): Promise<OrchestratorResult> {
   // Llama と Gemini に並列送信
   const [llamaResult, mixtralResult] = await Promise.allSettled([
-    withTimeout(askGPT(question, history), TIMEOUT_MS),
-    withTimeout(askClaude(question, history), TIMEOUT_MS),
+    withTimeout(askGPT(question, history, location), TIMEOUT_MS),
+    withTimeout(askClaude(question, history, location), TIMEOUT_MS),
   ]);
 
   const llamaAnswer =

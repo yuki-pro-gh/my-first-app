@@ -13,10 +13,12 @@ interface Message {
 // Qwen3 32B（Alibaba製、回答者2）
 export async function askClaude(
   question: string,
-  history: Message[] = []
+  history: Message[] = [],
+  location?: string
 ): Promise<string> {
+  const locationNote = location ? ` The user is currently in ${location}.` : "";
   const messages = [
-    { role: "system" as const, content: "Please answer concisely in approximately 150 characters. Provide key points only, omitting unnecessary explanations." },
+    { role: "system" as const, content: `Please answer concisely in approximately 150 characters. Provide key points only, omitting unnecessary explanations.${locationNote}` },
     ...history.map((m) => ({ role: m.role, content: m.content })),
     { role: "user" as const, content: question },
   ];

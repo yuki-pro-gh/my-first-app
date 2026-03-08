@@ -18,6 +18,7 @@ const RequestSchema = z.object({
       content: z.string(),
     })
   ),
+  location: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "不正なリクエストです" }, { status: 400 });
   }
 
-  const { sessionId, message, history } = parsed.data;
+  const { sessionId, message, history, location } = parsed.data;
 
   await connectDB();
 
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
   });
 
   // オーケストレーターで回答取得
-  const result = await orchestrate(message, history);
+  const result = await orchestrate(message, history, location);
 
   // アシスタントの回答を保存
   const assistantMessage = await Message.create({

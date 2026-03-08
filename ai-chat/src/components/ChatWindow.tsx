@@ -16,7 +16,26 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [prefillText, setPrefillText] = useState("");
+  const [location, setLocation] = useState<string | undefined>(undefined);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+        );
+        const data = await res.json();
+        const city = data.address?.city ?? data.address?.town ?? data.address?.county ?? "";
+        const country = data.address?.country ?? "";
+        if (city || country) setLocation([city, country].filter(Boolean).join(", "));
+      } catch {
+        // 位置情報取得失敗は無視
+      }
+    });
+  }, []);
 
   useEffect(() => {
     setFetching(true);
@@ -60,7 +79,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, message: text, history }),
+        body: JSON.stringify({ sessionId, message: text, history, location }),
       });
 
       if (!res.ok) {

@@ -152,7 +152,7 @@ export function ChatWindow({ sessionId, onTitleChange }: ChatWindowProps) {
                 </div>
               </div>
               <p className="text-xs text-gray-400 ml-1">
-                Two AIs are thinking... (up to 30s)
+                Three AIs are thinking... (up to 30s)
               </p>
             </div>
           )}

@@ -5,6 +5,12 @@ import { SessionProvider } from "@/components/SessionProvider";
 export const metadata: Metadata = {
   title: "Hallucination Check",
   description: "マルチモデル合議AIチャット",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Hallucination Check",
+  },
 };
 
 export default function RootLayout({
